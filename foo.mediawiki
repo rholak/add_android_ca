@@ -1,0 +1,37 @@
+= Manually Adding a CA to Android's Certificate List =
+== Android 4.0+ Standard Method ==
+Android 4.0+ currently provides a fairly simple way to add certificates to your device. This includes CA (sometimes called "root") certificates. The common ones, which are also included in most operating systems and web browsers, are already installed by default on an Android device. This allows you to connect to any service using SSL certificates signed by one of those providers. 
+
+Sometimes, though, you may want to use a company or personal CA. An example of this is a company that requires you to authenticate to their WiFi network using 802.1x. The standard way to add this is:
+# Download the certificate from your provider's interface (e.g. Microsoft Active Directory Certificate Services). 
+# Place this file on your SD card (or /sdcard directory if your phone has only internal storage).
+# Go to Settings->Security and select "Install from storage"
+# Set a PIN/password/pattern.
+
+== Adding a CA Without Requiring a PIN ==
+These methods work with Android 4.0.4 and above. To manually add a CA in earlier versions, there is a guide at the [http://wiki.cacert.org/FAQ/ImportRootCert#Android_Phones CACert Wiki].
+=== Using the Shell ===
+If you do not want to have to use a PIN to unlock your phone, you can add the CA via an ADB shell or a terminal emulator app on your device:
+# Download the certificate. This method was tested using a Base64 encoded cert, so choose that if possible.
+# Place this file on your SD card or /sdcard storage directory.
+# Enter a root shell. (You can use "su", "adb root && adb shell", or whatever method you prefer.)
+# Make sure /system is mounted read/write:
+#: <pre>mount -o remount,rw /system</pre>
+# Copy the file to <code>/system/etc/security/cacerts</code>
+#: <pre>cp /sdcard/mycert.cer /system/etc/security/cacerts</pre>
+# Rename the file to an eight-character hex code with the extention: .0
+#: <pre>cd /system/etc/security/cacerts ; mv mycert.cer 00000000.0</pre>
+#: ''Note: I am not sure where the existing hashes for standard root certificates come from, so I insert the manual ones starting from all zeros: 00000000.0, 00000001.0, etc.''
+# Reboot and your CA will now be listed in the system CAs. ( Settings->Security->Trusted credentials - your CA should be in the SYSTEM tab list now )
+
+=== Other Methods/TL;DR ===
+If you are reading this Wiki entry, you are probably an advanced user, so the basic steps are:
+# Download your CA as Base64 encoded.
+# Rename as an 8-char ".0" extension file using hex digits such as <code>00000001.0</code>, <code>00000002.0</code>, etc
+# Copy to <code>/system/etc/security/cacerts</code> using
+## ADB shell
+## Terminal
+## ADB push
+## File manager with root privileges
+## Your favorite file copying method
+
